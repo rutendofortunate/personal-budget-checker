@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Personal Budget Checker</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Roboto", sans-serif;
+        background-color: #ececec; /* First color */
+        margin: 0;
+        padding: 0;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 20px auto;
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        text-align: center;
+        color: #142d4c; /* Fourth color */
+        font-weight: 500;
+      }
+
+      h2 {
+        text-align: center;
+        border: 1px solid #385170; /* Third color */
+        padding: 15px;
+        font-size: 20px;
+        border-radius: 4px;
+        background-color: #9fd3c7; /* Second color */
+        color: #142d4c; /* Fourth color */
+        font-weight: 500;
+      }
+
+      img {
+        display: block;
+        margin: 20px auto;
+        max-width: 100%;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      p {
+        line-height: 1.6;
+        font-size: 16px;
+        margin: 20px 0;
+        color: #333;
+        font-weight: 400;
+      }
+
+      a.read-more {
+        text-decoration: none;
+        color: #385170; /* Third color */
+        font-size: 14px;
+      }
+
+      a.read-more:hover {
+        text-decoration: underline;
+      }
+
+      button {
+        display: inline-block;
+        margin: 10px;
+        background-color: #385170; /* Third color */
+        color: white;
+        font-size: 16px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        transition: all 200ms ease-in-out;
+        font-weight: 500;
+      }
+
+      button:hover {
+        opacity: 0.9;
+        cursor: pointer;
+      }
+
+      .footer {
+        text-align: center;
+        margin-top: 20px;
+        color: #142d4c; /* Fourth color */
+        font-size: 14px;
+      }
+
+      .footer a {
+        text-decoration: none;
+        color: #385170; /* Third color */
+      }
+
+      .footer a:hover {
+        text-decoration: underline;
+      }
+
+      .button-container {
+        text-align: center;
+      }
+
+      .summary {
+        display: none;
+        text-align: center;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Personal Budget Checker</h1>
+
+      <div class="summary-content">
+        <h2>Track Your Monthly Expenses</h2>
+        <img
+          id="landingImage"
+          src="https://s3.amazonaws.com/shecodesio-production/uploads/files/000/133/170/original/Featured-image-Income-and-Expenses-video-3.png?1720883557"
+          alt="budget tracking"
+        />
+        <p>
+          Do you ever find yourself wondering where all your money went at the
+          end of the month? Does the thought of creating a budget seem
+          overwhelming? If so, you're not alone. Learning how to track your
+          spending is a simple but powerful tool for gaining control of your
+          finances.
+        </p>
+        <a
+          href="https://www.forbes.com/sites/melissahouston/2024/01/12/how-to-track-your-spending-and-slay-your-finances/"
+          target="_blank"
+          class="read-more"
+        >
+          Read More on Forbes</a
+        >
+
+        <div class="button-container">
+          <button class="enter-income-button">Enter Income</button>
+          <button class="enter-expenses-button">Enter Expenses</button>
+          <button class="view-summary-button">View Summary</button>
+        </div>
+      </div>
+
+      <div class="summary">
+        <h2>Summary</h2>
+        <canvas id="summaryChart"></canvas>
+        <p id="summaryText"></p>
+        <button class="back-to-home-button">Back to Home</button>
+      </div>
+
+      <p class="footer">
+        This page was built by
+        <a href="https://www.linkedin.com/in/rutendofortunate/" target="_blank">
+          Rutendo Fortunate Horonga</a
+        >
+      </p>
+    </div>
+    <script>
+      let income = 0;
+      let expenses = 0;
+      let summaryChart;
+
+      function enterIncome() {
+        income = parseFloat(prompt("Enter your income:"));
+        alert("Your income has been recorded: $" + income);
+      }
+
+      function enterExpenses() {
+        expenses = parseFloat(prompt("Enter your expenses:"));
+        alert("Your expenses have been recorded: $" + expenses);
+      }
+
+      function viewSummary() {
+        const summaryContent = document.querySelector(".summary-content");
+        const summarySection = document.querySelector(".summary");
+        const summaryText = document.getElementById("summaryText");
+        let summaryMessage;
+
+        if (income > expenses) {
+          summaryMessage = `Your income is $${income}. Your expenses are $${expenses}. You should save the remaining amount.`;
+        } else if (income < expenses) {
+          summaryMessage = `Your income is $${income}. Your expenses are $${expenses}. You should reduce your expenses.`;
+        } else {
+          summaryMessage = `Your income is $${income}. Your expenses are $${expenses}. You should increase your income.`;
+        }
+
+        summaryText.textContent = summaryMessage;
+
+        // Update the chart
+        const ctx = document.getElementById("summaryChart").getContext("2d");
+
+        if (summaryChart) {
+          summaryChart.destroy(); // Destroy the existing chart instance
+        }
+
+        summaryChart = new Chart(ctx, {
+          type: "pie",
+          data: {
+            labels: ["Income", "Expenses"],
+            datasets: [
+              {
+                data: [income, expenses],
+                backgroundColor: ["#9fd3c7", "#385170"],
+                hoverBackgroundColor: ["#142d4c", "#385170"],
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: "top",
+              },
+              title: {
+                display: true,
+                text: "Income vs Expenses",
+              },
+            },
+          },
+        });
+
+        // Hide the original content and show summary
+        summaryContent.style.display = "none";
+        summarySection.style.display = "block";
+      }
+
+      function backToHome() {
+        const summaryContent = document.querySelector(".summary-content");
+        const summarySection = document.querySelector(".summary");
+
+        summaryContent.style.display = "block";
+        summarySection.style.display = "none";
+      }
+
+      document
+        .querySelector(".enter-income-button")
+        .addEventListener("click", enterIncome);
+      document
+        .querySelector(".enter-expenses-button")
+        .addEventListener("click", enterExpenses);
+      document
+        .querySelector(".view-summary-button")
+        .addEventListener("click", viewSummary);
+      document
+        .querySelector(".back-to-home-button")
+        .addEventListener("click", backToHome);
+    </script>
+  </body>
+</html>
